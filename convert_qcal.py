@@ -1,6 +1,7 @@
 import os
 import sys
 import pandas as pd
+import numpy as np
 
 """
 Parse a .csv output file from qCal to a computer readable style in xls format.
@@ -60,13 +61,14 @@ def parse_ADC_voi(fname, protocol_number):
    
     df = pd.DataFrame(columns=col_names)
     for i in range(len(VOIs)):
-        df.loc[len(df)] = [pd.NA if len(x)==0 else x for x in VOIs[i]]
+        df.loc[len(df)] = [np.nan if len(x)==0 else x for x in VOIs[i]]
 
     dtypes = [float]*len(col_names)
     dtypes[0] = int
     dtypes[1] = str
     dtypes[2] = int
     for i,c in enumerate(df.columns):
+        print(i)
         df[c] = df[c].astype(dtypes[i])
     
     df['Protocol Number'] = protocol_number
@@ -123,11 +125,16 @@ def parse_temp(fname, protocol_number):
 
 
 def convert_to_xls(fname, out_fname, protocol_number):
-    ADC = parse_ADC_voi(fname, protocol_number)
     info = parse_study_params(fname, protocol_number)
+    ADC = parse_ADC_voi(fname, protocol_number)
+    ADC['Study Date'] = info['Study Date'][0]
+    
     temps = parse_temp(fname, protocol_number)
-    t2voi = parse_T2_voi(fname, protocol_number)
+    temps['Study Date'] = info['Study Date'][0]
 
+    t2voi = parse_T2_voi(fname, protocol_number)
+    t2voi['Study Date'] = info['Study Date'][0]
+    
     writer = pd.ExcelWriter(out_fname)
 
     ADC.to_excel(writer, sheet_name='ADC', index=False)
