@@ -108,7 +108,10 @@ def parse_temp(fname, protocol_number):
                 temp_labels = []
                 for i in range(len(s)):
                     if 'Temperature' in s[i]:
-                        temps.append(float(l2[i]))
+                        tt = l2[i]
+                        if tt[-1] == '\n':
+                            tt = tt[:-2]
+                        temps.append(float(tt))
                         temp_labels.append(s[i])
                 finished = True
     
